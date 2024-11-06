@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <title>Mowmart shopping cart!</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Mowmart!</h1>
+
+        <!-- tambah Barang -->
+        <div class="form-group">
+            <input type="text" id="itemName" placeholder="Nama Barang" required>
+            <input type="text" id="itemPrice" placeholder="Harga Barang" oninput="formatPriceInput(this)" required>
+            <button onclick="addItem()">Tambah Barang</button>
+        </div>
+
+        <!-- daftar Barang -->
+        <h2>Daftar Barang :</h2>
+        <ul id="itemList"></ul>
+
+        <!-- total Harga -->
+        <div class="total-container">
+            <h2>Total Harga :</h2>
+            <p>Subtotal: <span id="subtotal">Rp 0</span></p>
+            <p>Diskon: <span id="discount">Rp 0</span></p>
+            <p>Total Akhir: <span id="total">Rp 0</span></p>
+            <p id="diskon-info" class="diskon-info"></p>
+        </div>
+    </div>
+
+    <script>
+        // array untuk menyimpan barang
+        let cart = [];
+
+        // format angka menjadi rupiah
+        function formatPriceInput(input) {
+            let value = input.value.replace(/[^0-9]/g, "");
+            if (value) {
+                input.value = "Rp " + parseInt(value, 10).toLocaleString("id-ID");
+            } else {
+                input.value = "";
+            }
+        }
+
+        // menambahkan barang ke dalam keranjang
+        function addItem() {
+            const name = document.getElementById("itemName").value;
+            const priceText = document.getElementById("itemPrice").value;
+            const price = parseInt(priceText.replace(/[^0-9]/g, ""), 10);
+            
+            if (!name || isNaN(price)) {
+                alert("Silakan masukkan nama dan harga barang.");
+                return;
+            }
+
+            cart.push({ name, price });
+            displayItems();
+            calculateTotal();
+
+            document.getElementById("itemName").value = "";
+            document.getElementById("itemPrice").value = "";
+        }
+
+        // menampilkan barang yang ada di keranjang
+        function displayItems() {
+            const itemList = document.getElementById("itemList");
+            itemList.innerHTML = "";
+
+            cart.forEach((item, index) => {
+                const listItem = document.createElement("li");
+                listItem.textContent = `${item.name} - Rp ${item.price.toLocaleString("id-ID")}`;
+                
+                const deleteButton = document.createElement("button");
+                deleteButton.textContent = "Hapus";
+                deleteButton.onclick = () => {
+                    removeItem(index);
+                };
+                
+                listItem.appendChild(deleteButton);
+                itemList.appendChild(listItem);
+            });
+        }
+
+        // menghapus barang dari keranjang
+        function removeItem(index) {
+            cart.splice(index, 1);
+            displayItems();
+            calculateTotal();
+        }
+
+        // menghitung total harga dengan diskon
+        function calculateTotal() {
+            let subtotal = cart.reduce((total, item) => total + item.price, 0);
+            let discount = 0;
+            let discountInfo = " ";
+
+            // menghitung diskon berdasarkan total dan jumlah barang
+            if (subtotal > 2000000) {
+                discount = subtotal * 0.15;
+                discountInfo = "Diskon 15% untuk pembelian di atas Rp 2 juta";
+            } else if (subtotal > 1000000) {
+                discount = subtotal * 0.10;
+                discountInfo = "Diskon 10% untuk pembelian di atas Rp 1 juta";
+            }
+            
+            if (cart.length > 5) {
+                discount += subtotal * 0.05;
+                discountInfo += " + Tambahan Diskon 5% untuk pembelian lebih dari 5 barang!";
+            }
+
+            const total = subtotal - discount;
+
+            // menampilkan subtotal, diskon, total akhir, dan informasi diskon
+            document.getElementById("subtotal").textContent = `Rp ${subtotal.toLocaleString("id-ID")}`;
+            document.getElementById("discount").textContent = `Rp ${discount.toLocaleString("id-ID")}`;
+            document.getElementById("total").textContent = `Rp ${total.toLocaleString("id-ID")}`;
+            document.getElementById("diskon-info").textContent = `${discountInfo}`;
+        }
+    </script>
+</body>
+</html>
